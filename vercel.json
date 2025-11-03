@@ -4,16 +4,25 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "cafe-review-search.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server.js"
+      "dest": "server.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "src": "/cafe-review-search.html",
+      "dest": "/cafe-review-search.html"
+    },
+    {
+      "src": "/",
+      "dest": "/cafe-review-search.html"
     }
   ]
 }
+
