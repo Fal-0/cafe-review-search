@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Review Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .location-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .location-buttons button {
+            flex: 1;
+            padding: 10px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .location-buttons button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .cafe-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .cafe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .cafe-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .cafe-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .cafe-address {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .review-snippet {
+            background: #f9fafb;
+            border-left: 3px solid #667eea;
+            padding: 10px 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #444;
+            font-style: italic;
+        }
+
+        .review-highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .example-keywords {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        .api-key-input {
+            position: relative;
+        }
+
+        .api-key-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☕ Cafe Review Search</h1>
+            <p>Find cafes based on what people actually say in reviews</p>
+        </div>
+
+        <div class="search-card">
+            <div class="info-box">
+                📍 First time? You'll need a Google Maps API key. <a href="https://console.cloud.google.com/google/maps-apis/overview" target="_blank" style="color: #667eea; font-weight: 600;">Get one here</a> (free tier = 28K requests/month)
+            </div>
+
+            <div class="input-group">
+                <label for="apiKey">Google Maps API Key</label>
+                <div class="api-key-input">
+                    <input type="password" id="apiKey" placeholder="Enter your API key">
+                    <button class="api-key-toggle" onclick="toggleApiKey()">Show</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="location">Your Location</label>
+                <div class="location-buttons">
+                    <button onclick="useCurrentLocation()">📍 Use My Location</button>
+                    <button onclick="showMapLinkInput()">🔗 Paste Maps Link</button>
+                </div>
+                <input type="text" id="location" placeholder="Or enter address/coordinates">
+            </div>
+
+            <div class="input-group">
+                <label for="keywords">What are you looking for?</label>
+                <textarea id="keywords" placeholder="e.g., quiet, studying, outlets, wifi, good for work, spacious"></textarea>
+                <div class="example-keywords">💡 Tip: Use keywords like "quiet", "outlets", "studying", "wifi", "spacious"</div>
+            </div>
+
+            <button class="button" onclick="searchCafes()">Search Cafes</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let apiKey = localStorage.getItem('googleMapsApiKey') || '';
+        if (apiKey) {
+            document.getElementById('apiKey').value = apiKey;
+        }
+
+        function toggleApiKey() {
+            const input = document.getElementById('apiKey');
+            const btn = document.querySelector('.api-key-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+
+        function useCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+
+            document.getElementById('location').value = 'Getting your location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('location').value = `${lat}, ${lng}`;
+                },
+                (error) => {
+                    alert('Could not get your location. Please enter it manually.');
+                    document.getElementById('location').value = '';
+                }
+            );
+        }
+
+        function showMapLinkInput() {
+            const link = prompt('Paste your Google Maps link:');
+            if (link) {
+                // Extract coordinates from Google Maps link
+                const coordMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (coordMatch) {
+                    document.getElementById('location').value = `${coordMatch[1]}, ${coordMatch[2]}`;
+                } else {
+                    alert('Could not extract coordinates from that link. Please try entering the location manually.');
+                }
+            }
+        }
+
+        async function searchCafes() {
+            const apiKeyInput = document.getElementById('apiKey').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const keywords = document.getElementById('keywords').value.trim().toLowerCase();
+
+            if (!apiKeyInput) {
+                alert('Please enter your Google Maps API key');
+                return;
+            }
+
+            if (!location) {
+                alert('Please enter a location or use your current location');
+                return;
+            }
+
+            if (!keywords) {
+                alert('Please enter what you\'re looking for (e.g., "quiet, studying, outlets")');
+                return;
+            }
+
+            // Save API key
+            localStorage.setItem('googleMapsApiKey', apiKeyInput);
+            apiKey = apiKeyInput;
+
+            // Parse location
+            let lat, lng;
+            const coordMatch = location.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
+            if (coordMatch) {
+                lat = coordMatch[1];
+                lng = coordMatch[2];
+            } else {
+                // Need to geocode the address
+                alert('Please use coordinates format: latitude, longitude (e.g., 24.8465060, 46.6824981)');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Searching for cafes and analyzing reviews...</p></div>';
+
+            try {
+                const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k);
+                const cafes = await findCafesWithReviews(lat, lng, keywordList);
+                displayResults(cafes, keywordList);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+
+        async function findCafesWithReviews(lat, lng, keywords) {
+            // Use proxy server to avoid CORS issues
+            const url = `/api/places/nearby?location=${lat},${lng}&radius=3000&type=cafe&key=${apiKey}`;
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch cafes from Google Places API. Check your API key and ensure Places API is enabled.');
+            }
+
+            const data = await response.json();
+            
+            if (data.status !== 'OK') {
+                throw new Error(`API Error: ${data.status}. ${data.error_message || ''}`);
+            }
+
+            // Get detailed info for each cafe including reviews
+            const cafesWithReviews = await Promise.all(
+                data.results.slice(0, 20).map(async (cafe) => {
+                    const detailsUrl = `/api/places/details?place_id=${cafe.place_id}&fields=name,rating,formatted_address,reviews&key=${apiKey}`;
+                    const detailsResponse = await fetch(detailsUrl);
+                    const detailsData = await detailsResponse.json();
+                    
+                    if (detailsData.status === 'OK') {
+                        return {
+                            ...cafe,
+                            reviews: detailsData.result.reviews || []
+                        };
+                    }
+                    return { ...cafe, reviews: [] };
+                })
+            );
+
+            // Score each cafe based on keyword matches in reviews
+            const scoredCafes = cafesWithReviews.map(cafe => {
+                let matchScore = 0;
+                const matchingReviews = [];
+
+                cafe.reviews.forEach(review => {
+                    const reviewText = review.text.toLowerCase();
+                    keywords.forEach(keyword => {
+                        if (reviewText.includes(keyword)) {
+                            matchScore++;
+                            if (matchingReviews.length < 3) { // Keep top 3 matching reviews
+                                matchingReviews.push({
+                                    text: review.text,
+                                    keyword: keyword
+                                });
+                            }
+                        }
+                    });
+                });
+
+                return {
+                    ...cafe,
+                    matchScore,
+                    matchingReviews
+                };
+            });
+
+            // Sort by match score
+            return scoredCafes.filter(c => c.matchScore > 0).sort((a, b) => b.matchScore - a.matchScore);
+        }
+
+        function displayResults(cafes, keywords) {
+            const resultsDiv = document.getElementById('results');
+
+            if (cafes.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="search-card">
+                        <p style="text-align: center; color: #666;">No cafes found matching your criteria. Try different keywords or expand your search area.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            cafes.forEach(cafe => {
+                html += `
+                    <div class="cafe-card">
+                        <div class="cafe-header">
+                            <div>
+                                <div class="cafe-name">${cafe.name}</div>
+                                <div class="cafe-rating">⭐ ${cafe.rating || 'N/A'}</div>
+                            </div>
+                            <div class="match-score">${cafe.matchScore} matches</div>
+                        </div>
+                        <div class="cafe-address">${cafe.vicinity || cafe.formatted_address || ''}</div>
+                `;
+
+                cafe.matchingReviews.forEach(review => {
+                    const highlightedText = highlightKeywords(review.text, keywords);
+                    html += `<div class="review-snippet">${highlightedText}</div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function highlightKeywords(text, keywords) {
+            let highlighted = text;
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                highlighted = highlighted.replace(regex, '<span class="review-highlight">$1</span>');
+            });
+            return highlighted;
+        }
+    </script>
+</body>
+</html>
